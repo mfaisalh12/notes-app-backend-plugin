@@ -21,7 +21,10 @@
 					"_pool",
 					"_authenticationsService",
 					"_usersService",
-					"_tokenManager"
+					"_tokenManager",
+					"_collaborationService",
+					"_notesService",
+					"_collaborationsService"
 				]
 			}
 		]

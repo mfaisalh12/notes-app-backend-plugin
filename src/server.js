@@ -1,3 +1,4 @@
+// mengimpor dotenv dan menjalankan konfigurasinya
 require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
@@ -19,8 +20,14 @@ const AuthenticationsService = require('./services/postgres/AuthenticationsServi
 const TokenManager = require('./tokenize/TokenManager');
 const AuthenticationsValidator = require('./validator/authentications');
 
+// collaborations
+const collaborations = require('./api/collaborations');
+const CollaborationsService = require('./services/postgres/CollaborationsService');
+const CollaborationsValidator = require('./validator/collaborations');
+
 const init = async () => {
-	const notesService = new NotesService();
+	const collaborationsService = new CollaborationsService();
+	const notesService = new NotesService(collaborationsService);
 	const usersService = new UsersService();
 	const authenticationsService = new AuthenticationsService();
 
@@ -34,20 +41,21 @@ const init = async () => {
 		},
 	});
 
+	// registrasi plugin eksternal
 	await server.register([
 		{
 			plugin: Jwt,
 		},
 	]);
 
-	// mendefinisikan strategy authentikasi jwt
+	// mendefinisikan strategy otentikasi jwt
 	server.auth.strategy('notesapp_jwt', 'jwt', {
 		keys: process.env.ACCESS_TOKEN_KEY,
 		verify: {
-			aud: false, // audience token tidak akan diverifikasi
-			iss: false, // issuer token tidak akan diverifikasi
-			sub: false, // subject token tidak akan diverifikasi
-			maxAgeSec: process.env.ACCESS_TOKEN_AGE, // umur kadaluarsa token
+			aud: false,
+			iss: false,
+			sub: false,
+			maxAgeSec: process.env.ACCESS_TOKEN_AGE,
 		},
 		validate: (artifacts) => ({
 			isValid: true,
@@ -79,6 +87,14 @@ const init = async () => {
 				usersService,
 				tokenManager: TokenManager,
 				validator: AuthenticationsValidator,
+			},
+		},
+		{
+			plugin: collaborations,
+			options: {
+				collaborationsService,
+				notesService,
+				validator: CollaborationsValidator,
 			},
 		},
 	]);
