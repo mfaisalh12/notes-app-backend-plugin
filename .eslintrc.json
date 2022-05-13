@@ -24,7 +24,8 @@
 					"_tokenManager",
 					"_collaborationService",
 					"_notesService",
-					"_collaborationsService"
+					"_collaborationsService",
+					"_exports"
 				]
 			}
 		]
